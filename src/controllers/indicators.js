@@ -1,38 +1,60 @@
 // import { getDiagnosisData } from '../utils/base'
 const express = require('express')
 const router = express.Router()
-const getDiagnosisData = require('../utils/base')
+const { getDiagnosisData, getAllDiagnosisData } = require('../utils/base')
+
 /**
- * @description 获取解析结果
+ * @description 测试接口
  */
 router.get('/test', function (req, res, next) {
   try {
     res.send({
-      code: '0',
+      code: 200,
       message: '操作成功',
       data: [],
     })
   } catch (error) {
     res.send({
-      code: '500',
+      code: 500,
       message: '操作失败',
       data: error.message,
     })
   }
 })
 
-router.post('/getAnalysisData', function (req, res, next) {
+/** 解析多张图片数据 */
+router.post('/getAnalysisData/multiple', function (req, res, next) {
+  try {
+    const { data } = req.body
+    const result = getAllDiagnosisData(data)
+    res.send({
+      code: 200,
+      message: '操作成功',
+      data: result,
+    })
+  } catch (error) {
+    console.log('error', error)
+    res.send({
+      code: 500,
+      message: '操作失败',
+      data: error.message,
+    })
+  }
+})
+
+/** 解析单张图片数据 */
+router.post('/getAnalysisData/single', function (req, res, next) {
   try {
     const { points, poseType } = req.body
-    const diagnosisData = getDiagnosisData(points, poseType)
+    const result = getDiagnosisData(points, poseType)
     res.send({
-      code: '200',
+      code: 200,
       message: '操作成功',
-      data: diagnosisData,
+      data: result,
     })
   } catch (error) {
     res.send({
-      code: '500',
+      code: 500,
       message: '操作失败',
       data: error.message,
     })

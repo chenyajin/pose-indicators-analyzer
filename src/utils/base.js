@@ -2,7 +2,7 @@
  * @Author: 陈亚金
  * @Date: 2024-06-11 13:51:39
  * @LastEditors: 陈亚金
- * @LastEditTime: 2024-06-13 16:11:59
+ * @LastEditTime: 2024-06-17 14:24:14
  * @Description:
  */
 
@@ -11,13 +11,39 @@ const {
   calculateAngleBetweenLines,
   calculateResultText,
 } = require('./rules')
-const getDiagnosisData = function (points, poseType) {
+
+const {
+  getDiagnosisResult,
+  getDiagnosisResultToServer,
+} = require('./serialize')
+
+/** 根据三张体态数据，获取所有诊断数据
+ * @param {Array} data 体态数据 [{ points, poseType }]
+ */
+const getAllDiagnosisData = function (data = []) {
+  const result = {}
+  const indicators = []
+  data.forEach((item) => {
+    const itemResult = getDiagnosisData(item.points, item.poseType)
+    result[item.poseType] = itemResult
+    indicators.push(...itemResult.indicatorSubGroup)
+  })
+  const diagnosisResult = getDiagnosisResult(indicators)
+  const diagnosisResultToServer = getDiagnosisResultToServer(diagnosisResult)
+  result['all'] = diagnosisResultToServer
+  return result
+}
+/** 根据体姿方向，获取诊断数据
+ * @param {Array} points 体态数据
+ * @param {String} poseType 体态类型
+ */
+const getDiagnosisData = function (points = [], poseType) {
   const {
-    points: targetPoint,
+    points: targetPoints,
     connections: targeConnections,
     indicatorNames,
   } = getDiagnosisPointsData(points, poseType)
-  const rawkeyPoints = targetPoint
+  const rawkeyPoints = targetPoints
   const groupNames = indicatorNames
   const indicatorSubGroup = groupNames.map((item, index) => {
     const ruleNumber = 2 * index
@@ -50,10 +76,14 @@ const getDiagnosisData = function (points, poseType) {
     }
   })
   return {
-    points: targetPoint,
+    poseType: poseType,
+    points: targetPoints,
     connections: targeConnections,
     indicatorNames,
     indicatorSubGroup,
   }
 }
-module.exports = getDiagnosisData
+module.exports = {
+  getDiagnosisData,
+  getAllDiagnosisData,
+}
