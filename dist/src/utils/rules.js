@@ -2,9 +2,10 @@
  * @Author: 陈亚金
  * @Date: 2024-04-28 09:48:54
  * @LastEditors: 陈亚金
- * @LastEditTime: 2024-06-13 16:10:40
+ * @LastEditTime: 2024-06-17 14:00:43
  * @Description: 指标偏移角度计算-规则
  */
+const { getAllPoints } = require('./openPoseRules')
 
 const PoseTypeEnum = {
   front: 'front', // 正面
@@ -15,7 +16,8 @@ const PoseTypeEnum = {
 
 /** 根据体姿模型 获取指标关键点数据 */
 const getDiagnosisPointsData = (data, poseType) => {
-  return points_data_25(data, poseType)
+  const allPoints = getAllPoints(data, poseType)
+  return points_data_25(allPoints, poseType)
 }
 
 const points_data_25 = (allData, poseType) => {
@@ -636,50 +638,6 @@ const calculateResultText = (pointStart, pointEnd, indicator, targetPoints) => {
     text: result,
     key: resultMoreThreshold ? key : 'threshold',
   }
-}
-
-/** 根据肩两点，髂前上棘两点计算出第八根肋骨的两点坐标点 */
-const findPointsAtOneThird = (line1, line2, denominator = 3) => {
-  const [line1StartX, line1StartY] = line1[0]
-  const [line1EndX, line1EndY] = line1[1]
-  const [line2StartX, line2StartY] = line2[0]
-  const [line2EndX, line2EndY] = line2[1]
-  /**
-   * 计算一条直线上，距离起点1/3处的点的坐标。
-   * @param {number} startX - 直线起点的x坐标
-   * @param {number} startY - 直线起点的y坐标
-   * @param {number} endX - 直线终点的x坐标
-   * @param {number} endY - 直线终点的y坐标
-   * @return {{x: number, y: number}} - 距离起点1/3处的点的坐标对象
-   */
-  const calculatePoint = (startX, startY, endX, endY) => {
-    // 向量的x分量和y分量
-    const vectorX = (endX - startX) / denominator
-    const vectorY = (endY - startY) / denominator
-
-    // 新点的坐标
-    const newX = startX + vectorX
-    const newY = startY + vectorY
-
-    return [newX, newY, 1]
-  }
-
-  // 计算line1上距离起点1/3处的点
-  const pointOnLine1 = calculatePoint(
-    line1StartX,
-    line1StartY,
-    line1EndX,
-    line1EndY
-  )
-
-  // 计算line2上距离起点1/3处的点
-  const pointOnLine2 = calculatePoint(
-    line2StartX,
-    line2StartY,
-    line2EndX,
-    line2EndY
-  )
-  return { line1: pointOnLine1, line2: pointOnLine2 }
 }
 
 /**
